@@ -48,7 +48,7 @@ async function logTrade({ symbol, side, amount, price, stopLoss, takeProfit, ord
     price,
     stopLoss,
     takeProfit,
-    status: "OPEN",
+    status: "PENDING",
     orderId: orderId || null,
     createdAt: new Date(),
   });

@@ -5,7 +5,7 @@ const TradeSchema = new mongoose.Schema({
   side: { type: String, enum: ["BUY", "SELL"], required: true },
   amount: { type: Number, required: true },
   price: { type: Number, required: true },
-  status: { type: String, enum: ["PENDING", "EXECUTED", "CLOSED"], default: "PENDING" },
+  status: { type: String, enum: ["PENDING", "CLOSED"], default: "PENDING" },
   profit: { type: Number, default: 0 },
   stopLoss: { type: Number },
   takeProfit: { type: Number },

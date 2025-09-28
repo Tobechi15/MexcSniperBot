@@ -6,6 +6,7 @@ const { placeOrder } = require("./Trade/execute");
 const { getPendingTrades } = require("./Database/transactions");
 const fetchTokens = require("./DexApi/fetchtoken");
 const Trade = require("./Database/models/Trade");
+const getPrice = require("./DexApi/getPrice");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -58,8 +59,6 @@ app.listen(PORT, async () => {
     setInterval(async () => {
       try {
         const tokens = await fetchTokens();
-        console.log('fetched')
-        console.log("📥 Tokens fetched:", tokens);
 
         for (const token of tokens) {
           // ✅ Example condition: trade only tokens with "USDT" in symbol
@@ -81,14 +80,13 @@ app.listen(PORT, async () => {
 
             // Save executed order in DB
             await logTrade({
-              symbol: order.symbol || token.symbol,
-              side: order.side || "BUY",
-              amount: order.amount || 0.001,
-              price: order.price || token.price || 50000,
-              stopLoss: (token.price || 50000) * 0.95, // 5% SL
-              takeProfit: (token.price || 50000) * 1.05, // 5% TP
-              status: "OPEN",
-              orderId: order.orderId || null,
+              symbol: order.symbol,
+              side: order.side,
+              amount: order.origQty,
+              price: order.price,
+              stopLoss: (order.price) * 0.95, // 5% SL
+              takeProfit: (order.price) * 1.05, // 5% TP
+              orderId: order.orderId,
             });
 
             console.log("📝 Trade logged to DB");
@@ -105,7 +103,7 @@ app.listen(PORT, async () => {
 
       for (const t of pendingTrades) {
         // Simulated price feed (replace with real price API)
-        const currentPrice = t.price + Math.random() * 2000 - 1000;
+        const currentPrice = getPrice(t.symbol)
 
         console.log(
           `📊 Monitoring trade ${t.symbol} | Entry: ${t.price} | Current: ${currentPrice}`
