@@ -8,6 +8,7 @@ const BASE_URL = "https://api.mexc.com/api/v3/order";
  */
 function createSignature(params, secretKey) {
   const query = new URLSearchParams(params).toString();
+  console.log('query', query)
   console.log(crypto.createHmac("sha256", secretKey).update(query).digest("hex"))
   return crypto.createHmac("sha256", secretKey).update(query).digest("hex");
 }
@@ -27,7 +28,7 @@ async function placeOrder(symbol, side, quantity, apiKey, secretKey) {
       side,
       type: "MARKET",
       quantity,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
     // Generate signature
     params.signature = createSignature(params, secretKey);
