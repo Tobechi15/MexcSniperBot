@@ -6,10 +6,9 @@ const { placeOrder } = require("./Trade/execute");
 const { getPendingTrades } = require("./Database/transactions");
 const fetchTokens = require("./DexApi/fetchtoken");
 const Trade = require("./Database/models/Trade");
-const { connect } = require("tls");
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(express.json());
