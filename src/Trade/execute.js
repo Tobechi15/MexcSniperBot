@@ -23,13 +23,24 @@ function createSignature(params, secretKey) {
  */
 async function placeOrder(symbol, side, quantity, apiKey, secretKey) {
   try {
-    const params = {
-      symbol,
-      side,
-      type: "MARKET",
-      quantity,
-      timestamp: Date.now()
-    };
+    let params
+    if (side === "BUY") {
+      params = {
+        symbol,
+        side,
+        type: "MARKET",
+        quoteOrderQty: quantity,
+        timestamp: Date.now()
+      };
+    } else if (side === "SELL") {
+      params = {
+        symbol,
+        side,
+        type: "MARKET",
+        quantity,
+        timestamp: Date.now()
+      }
+    }
     // Generate signature
     params.signature = createSignature(params, secretKey);
 
