@@ -28,8 +28,6 @@ async function placeOrder(symbol, side, quantity, apiKey, secretKey) {
       quantity,
       timestamp: Date.now(),
     };
-
-    console.log(secretKey, apiKey);
     // Generate signature
     params.signature = createSignature(params, secretKey);
 
