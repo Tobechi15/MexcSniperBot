@@ -71,7 +71,7 @@ app.listen(PORT, async () => {
           const order = await placeOrder(
             token,
             "BUY",
-            0.001, // trade size (adjust)
+            1, // trade size (adjust)
             config.MEXC_API_KEY,
             config.MEXC_SECRET_KEY
           );

@@ -8,8 +8,6 @@ const BASE_URL = "https://api.mexc.com/api/v3/order";
  */
 function createSignature(params, secretKey) {
   const query = new URLSearchParams(params).toString();
-  console.log('query', query)
-  console.log(crypto.createHmac("sha256", secretKey).update(query).digest("hex"))
   return crypto.createHmac("sha256", secretKey).update(query).digest("hex");
 }
 
