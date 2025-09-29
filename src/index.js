@@ -7,6 +7,7 @@ const { getPendingTrades } = require("./Database/transactions");
 const fetchTokens = require("./DexApi/fetchtoken");
 const Trade = require("./Database/models/Trade");
 const getPrice = require("./DexApi/getPrice");
+const sendTelegramMessage = require("./DexApi/alert");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -82,6 +83,7 @@ app.listen(PORT, async () => {
 
             if (order) {
               console.log("✅ Order executed:", order);
+              sendTelegramMessage(`🚀 New Trade Executed: ${token} at ${order.price}`);
 
               // Save executed order in DB
               await logTrade({
