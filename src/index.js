@@ -54,42 +54,48 @@ app.listen(PORT, async () => {
     await connectDB();
 
     console.log("🚀 Sniper Bot Started");
+    await fetchTokens();
+    const limit = 2;
+    let count = 0;
 
     // === Continuous token fetch and trade placement ===
     setInterval(async () => {
       try {
         const tokens = await fetchTokens();
 
+
         for (const token of tokens) {
           // ✅ Example condition: trade only tokens with "USDT" in symbol
           if (!token.includes("USDT")) continue;
 
           console.log(`📌 Considering trade for ${token}`);
-          
-          // Place order
-          const order = await placeOrder(
-            token,
-            "BUY",
-            1, // trade size (adjust)
-            config.MEXC_API_KEY,
-            config.MEXC_SECRET_KEY
-          );
 
-          if (order) {
-            console.log("✅ Order executed:", order);
+          if (count <= limit) {
+            // Place order
+            const order = await placeOrder(
+              token,
+              "BUY",
+              1, // trade size (adjust)
+              config.MEXC_API_KEY,
+              config.MEXC_SECRET_KEY
+            );
 
-            // Save executed order in DB
-            await logTrade({
-              symbol: order.symbol,
-              side: order.side,
-              amount: order.origQty,
-              price: order.price,
-              stopLoss: (order.price) * 0.95, // 5% SL
-              takeProfit: (order.price) * 1.05, // 5% TP
-              orderId: order.orderId,
-            });
+            if (order) {
+              console.log("✅ Order executed:", order);
 
-            console.log("📝 Trade logged to DB");
+              // Save executed order in DB
+              await logTrade({
+                symbol: order.symbol,
+                side: order.side,
+                amount: order.origQty,
+                price: order.price,
+                stopLoss: (order.price) * 0.50, // 50% SL
+                takeProfit: (order.price) * 1.05, // 5% TP
+                orderId: order.orderId,
+              });
+
+              console.log("📝 Trade logged to DB");
+            }
           }
         }
       } catch (err) {

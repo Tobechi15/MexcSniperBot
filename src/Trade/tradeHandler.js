@@ -17,6 +17,7 @@ function createSignature(params, secretKey) {
  */
 async function fetchBalance(symbol) {
   try {
+    const BASE_ACCOUNT_URL = "https://api.mexc.com/api/v3/account";
     const baseAsset = symbol.replace("USDT", ""); // crude parse: works for BTCUSDT, ETHUSDT, etc.
     const params = { timestamp: Date.now() };
     params.signature = createSignature(params, config.MEXC_SECRET_KEY);
