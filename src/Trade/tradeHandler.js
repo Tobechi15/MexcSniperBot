@@ -69,7 +69,7 @@ async function logTrade({ symbol, side, amount, price, stopLoss, takeProfit, ord
  * Monitor an active trade for stop-loss/take-profit
  */
 async function monitorTrade(trade, currentPrice) {
-  if (trade.status !== "OPEN" && trade.status !== "EXECUTED") return;
+  if (trade.status !== "PENDING") return;
 
   console.log(
     `🔍 Monitoring ${trade.symbol} | Side: ${trade.side} | Entry: ${trade.price} | Current: ${currentPrice}`

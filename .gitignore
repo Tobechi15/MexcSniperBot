@@ -1,3 +1,4 @@
 node_modules/
 .env
 symbols.json
+test.js

@@ -12,5 +12,6 @@ const TradeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   closedAt: { type: Date }
 });
+const Trade = mongoose.model("MEXC", TradeSchema);
 
-module.exports = mongoose.model("Trade", TradeSchema);
+module.exports = Trade;

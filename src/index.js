@@ -98,6 +98,7 @@ app.listen(PORT, async () => {
 
               console.log("📝 Trade logged to DB");
             }
+            count++;
           }
         }
       } catch (err) {

@@ -56,11 +56,9 @@ async function placeOrder(symbol, side, quantity, apiKey, secretKey) {
       side: data.side || side,
       price: parseFloat(data.price) || 0,
       executedQty: parseFloat(data.executedQty) || quantity,
-      status: data.status || "EXECUTED",
+      status: "PENDING",
       raw: data, // keep full response for debugging
     };
-
-    console.log("✅ Order Executed:", orderInfo);
     return orderInfo;
   } catch (err) {
     console.error("❌ Order Error:", err.response?.data || err.message);
