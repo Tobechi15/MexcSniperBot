@@ -114,7 +114,7 @@ async function closeTrade(trade, closePrice, reason = "MANUAL") {
     console.log(`📦 Balance available for ${trade.symbol}: ${balanceQty}`);
 
     // Use minimum of stored amount and actual balance
-    const sellAmount = Math.min(trade.amount, balanceQty);
+    const sellAmount = balanceQty;
 
     // Execute opposite order
     const closeOrder = await placeOrder(
