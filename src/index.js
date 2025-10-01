@@ -83,16 +83,16 @@ app.listen(PORT, async () => {
 
             if (order) {
               console.log("✅ Order executed:", order);
-              sendTelegramMessage(`🚀 New Trade Executed: ${token} at ${order.price}`);
+              sendTelegramMessage(`🚀 New Trade Executed: ${token} at ${order.price} amount ${order.executedQty} USDT`);
 
               // Save executed order in DB
               await logTrade({
                 symbol: order.symbol,
                 side: order.side,
-                amount: order.origQty,
+                amount: order.executedQty,
                 price: order.price,
                 stopLoss: (order.price) * 0.50, // 50% SL
-                takeProfit: (order.price) * 1.50, // 50% TP
+                takeProfit: (order.price) * 1.05, // 5% TP
                 orderId: order.orderId,
               });
 

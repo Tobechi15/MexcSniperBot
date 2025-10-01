@@ -15,51 +15,57 @@ function createSignature(params, secretKey) {
  * Place an order (BUY/SELL)
  * @param {string} symbol - Trading pair (e.g., BTCUSDT)
  * @param {string} side - "BUY" or "SELL"
- * @param {number} quantity - Amount to trade
+ * @param {number} amount - Amount (quantity or quote amount depending on type)
+ * @param {string} type - "MARKET" or "LIMIT"
+ * @param {number} price - Price (only for LIMIT)
  * @param {string} apiKey - MEXC API Key
  * @param {string} secretKey - MEXC Secret Key
  */
-async function placeOrder(symbol, side, quantity, apiKey, secretKey) {
+async function placeOrder(symbol, side, amount, type, price, apiKey, secretKey) {
   try {
-    let params
-    if (side === "BUY") {
-      params = {
-        symbol,
-        side,
-        type: "MARKET",
-        quoteOrderQty: quantity,
-        timestamp: Date.now()
-      };
-    } else if (side === "SELL") {
-      params = {
-        symbol,
-        side,
-        type: "MARKET",
-        quantity,
-        timestamp: Date.now()
+    let params = {
+      symbol,
+      side,
+      type,
+      timestamp: Date.now()
+    };
+
+    if (type === "MARKET") {
+      if (side === "BUY") {
+        // BUY MARKET → spend this much USDT
+        params.quoteOrderQty = amount;
+      } else if (side === "SELL") {
+        // SELL MARKET → sell this many base tokens
+        params.quantity = amount;
       }
+    } else if (type === "LIMIT") {
+      params.quantity = amount;
+      params.price = price;
     }
+
     // Generate signature
     params.signature = createSignature(params, secretKey);
 
     const response = await axios.post(BASE_URL, null, {
       params,
-      headers: { "X-MEXC-APIKEY": apiKey, "Content-Type": "application/json" },
+      headers: {
+        "X-MEXC-APIKEY": apiKey,
+        "Content-Type": "application/json"
+      }
     });
 
     const data = response.data;
 
     // Normalize response for DB logging
-    const orderInfo = {
+    return {
       orderId: data.orderId || null,
       symbol: data.symbol || symbol,
-      side: data.side || side,
+      side: data.side,
       price: parseFloat(data.price) || 0,
-      executedQty: parseFloat(data.executedQty) || quantity,
+      executedQty: amount,
       status: "PENDING",
-      raw: data, // keep full response for debugging
+      raw: data
     };
-    return orderInfo;
   } catch (err) {
     console.error("❌ Order Error:", err.response?.data || err.message);
     return null;
