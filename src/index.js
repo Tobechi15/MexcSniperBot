@@ -56,7 +56,7 @@ app.listen(PORT, async () => {
 
     console.log("🚀 Sniper Bot Started");
     await fetchTokens();
-    const limit = 2;
+    const limit = 1;
     let count = 0;
 
     // === Continuous token fetch and trade placement ===
@@ -71,7 +71,7 @@ app.listen(PORT, async () => {
 
           console.log(`📌 Considering trade for ${token}`);
 
-          if (count <= limit) {
+          if (count < limit) {
             // Place order
             const order = await placeOrder(
               token,
