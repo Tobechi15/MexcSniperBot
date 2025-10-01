@@ -92,13 +92,13 @@ app.listen(PORT, async () => {
                 amount: order.origQty,
                 price: order.price,
                 stopLoss: (order.price) * 0.50, // 50% SL
-                takeProfit: (order.price) * 1.05, // 5% TP
+                takeProfit: (order.price) * 1.50, // 50% TP
                 orderId: order.orderId,
               });
 
               console.log("📝 Trade logged to DB");
+              count++;
             }
-            count++;
           }
         }
       } catch (err) {
