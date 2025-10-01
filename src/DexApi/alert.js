@@ -25,5 +25,4 @@ async function sendTelegramMessage(message) {
     }
 }
 
-sendTelegramMessage("uuu iijk i,mji")
 module.exports = sendTelegramMessage;
