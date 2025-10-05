@@ -70,36 +70,38 @@ app.listen(PORT, async () => {
           if (!token.includes("USDT")) continue;
 
           console.log(`📌 Considering trade for ${token}`);
+          sendTelegramMessage(`📌 new token discovered ${token} pls compare time`);
 
-          if (count < limit) {
-            // Place order
-            const order = await placeOrder(
-              token,
-              "BUY",
-              1, // trade size (adjust)
-              config.MEXC_API_KEY,
-              config.MEXC_SECRET_KEY
-            );
+          // if (count < limit) {
+          //   // Place order
+            
+          //   const order = await placeOrder(
+          //     token,
+          //     "BUY",
+          //     1, // trade size (adjust)
+          //     config.MEXC_API_KEY,
+          //     config.MEXC_SECRET_KEY
+          //   );
 
-            if (order) {
-              console.log("✅ Order executed:", order);
-              sendTelegramMessage(`🚀 New Trade Executed: ${token} at ${order.price} amount ${order.executedQty} USDT`);
+          //   if (order) {
+          //     console.log("✅ Order executed:", order);
+          //     sendTelegramMessage(`🚀 New Trade Executed: ${token} at ${order.price} amount ${order.executedQty} USDT`);
 
-              // Save executed order in DB
-              await logTrade({
-                symbol: order.symbol,
-                side: order.side,
-                amount: order.executedQty,
-                price: order.price,
-                stopLoss: (order.price) * 0.50, // 50% SL
-                takeProfit: (order.price) * 1.05, // 5% TP
-                orderId: order.orderId,
-              });
+          //     // Save executed order in DB
+          //     await logTrade({
+          //       symbol: order.symbol,
+          //       side: order.side,
+          //       amount: order.executedQty,
+          //       price: order.price,
+          //       stopLoss: (order.price) * 0.50, // 50% SL
+          //       takeProfit: (order.price) * 1.05, // 5% TP
+          //       orderId: order.orderId,
+          //     });
 
-              console.log("📝 Trade logged to DB");
-              count++;
-            }
-          }
+          //     console.log("📝 Trade logged to DB");
+          //     count++;
+          //   }
+          // }
         }
       } catch (err) {
         console.error("❌ Error in token fetch loop:", err.message);
