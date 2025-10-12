@@ -192,8 +192,7 @@ app.listen(PORT, async () => {
     // === Continuous token fetch and trade placement ===
     setInterval(async () => {
       try {
-        const tokens = await fetchTokens();
-
+        const tokens = await fetchTokens(false);
 
         for (const token of tokens) {
           // ✅ Example condition: trade only tokens with "USDT" in symbol

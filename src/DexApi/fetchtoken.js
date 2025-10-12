@@ -7,25 +7,21 @@ const storeFile = "symbols.json";
 
 async function hasPriorPrice(symbol) {
     try {
-        // Fetch 1-minute candles for last 6 hours
         const endTime = Date.now();
-        const startTime = endTime - 6 * 60 * 60 * 1000;
+        const startTime = endTime - 6 * 60 * 60 * 1000; // 6 hours range
 
         const url = `${priceEndpoint}?symbol=${symbol}&interval=1m&startTime=${startTime}&endTime=${endTime}&limit=10`;
         const res = await axios.get(url);
 
-        // If klines exist, token had a price before detection → likely relisted
-        if (Array.isArray(res.data) && res.data.length > 0) {
-            return true;
-        }
-        return false;
+        // If any price data exists → token likely relisted
+        return Array.isArray(res.data) && res.data.length > 0;
     } catch (err) {
         console.error(`⚠️ Error checking price for ${symbol}:`, err.message);
         return false;
     }
 }
 
-async function fetchTokens() {
+async function fetchTokens(checkHistory = true) {
     try {
         const response = await axios.get(endpoint);
 
@@ -40,18 +36,24 @@ async function fetchTokens() {
             // Detect new tokens
             const newTokens = currentSymbols.filter(sym => !previousSymbols.includes(sym));
 
-            const verifiedNewTokens = [];
-            for (const token of newTokens) {
-                const hadPriceBefore = await hasPriorPrice(token);
-                if (!hadPriceBefore) {
-                    verifiedNewTokens.push(token);
-                } else {
-                    console.log(`🚫 Skipping ${token} (had price history before launch)`);
+            let verifiedNewTokens = [];
+
+            if (checkHistory) {
+                console.log("🔍 Checking historical price data for new tokens...");
+                for (const token of newTokens) {
+                    const hadPriceBefore = await hasPriorPrice(token);
+                    if (!hadPriceBefore) {
+                        verifiedNewTokens.push(token);
+                    } else {
+                        console.log(`🚫 Skipping ${token} (had price history before launch)`);
+                    }
                 }
+            } else {
+                verifiedNewTokens = newTokens; // skip history check
             }
 
             if (verifiedNewTokens.length > 0) {
-                console.log("✨ Verified new tokens detected:", verifiedNewTokens);
+                console.log("✨ New tokens detected:", verifiedNewTokens);
                 fs.writeFileSync(storeFile, JSON.stringify(currentSymbols, null, 2));
             } else {
                 console.log("No verified new tokens found.");
