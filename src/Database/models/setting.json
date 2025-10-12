@@ -1,0 +1,9 @@
+{
+  "takeProfit": 15,
+  "stopLoss": "5",
+  "buyAmount": 100,
+  "currency": "USDT",
+  "walletAccessKey": "001621812246e47acc90b63e2b95b40c:a47709df273d21612a162811aa57a63d",
+  "walletSecret": "8efc2f9b47b3f72e628f6f989ac31eae:369e849fc43587bc467cb4a59b2e6821",
+  "createdAt": "2025-10-09T05:52:19.939Z"
+}

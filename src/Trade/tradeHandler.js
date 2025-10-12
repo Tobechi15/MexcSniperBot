@@ -71,9 +71,9 @@ async function logTrade({ symbol, side, amount, price, stopLoss, takeProfit, ord
 async function monitorTrade(trade, currentPrice) {
   if (trade.status !== "PENDING") return;
 
-  console.log(
-    `🔍 Monitoring ${trade.symbol} | Side: ${trade.side} | Entry: ${trade.price} | Current: ${currentPrice}`
-  );
+  // console.log(
+  //   `🔍 Monitoring ${trade.symbol} | Side: ${trade.side} | Entry: ${trade.price} | Current: ${currentPrice}`
+  // );
 
   // Stop Loss
   if (trade.stopLoss && currentPrice <= trade.stopLoss && trade.side === "BUY") {
