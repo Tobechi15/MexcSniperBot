@@ -185,14 +185,14 @@ app.listen(PORT, async () => {
     await connectDB();
 
     console.log("🚀 Sniper Bot Started");
-    await fetchTokens();
+    await fetchTokens(false);
     const limit = 1;
     let count = 0;
 
     // === Continuous token fetch and trade placement ===
     setInterval(async () => {
       try {
-        const tokens = await fetchTokens(false);
+        const tokens = await fetchTokens();
 
         for (const token of tokens) {
           // ✅ Example condition: trade only tokens with "USDT" in symbol
