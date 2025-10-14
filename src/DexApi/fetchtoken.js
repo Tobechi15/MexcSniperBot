@@ -39,7 +39,6 @@ async function fetchTokens(checkHistory = true) {
             let verifiedNewTokens = [];
 
             if (checkHistory) {
-                console.log("🔍 Checking historical price data for new tokens...");
                 for (const token of newTokens) {
                     const hadPriceBefore = await hasPriorPrice(token);
                     if (!hadPriceBefore) {
@@ -55,8 +54,6 @@ async function fetchTokens(checkHistory = true) {
             if (verifiedNewTokens.length > 0) {
                 console.log("✨ New tokens detected:", verifiedNewTokens);
                 fs.writeFileSync(storeFile, JSON.stringify(currentSymbols, null, 2));
-            } else {
-                console.log("No verified new tokens found.");
             }
 
             return verifiedNewTokens;
