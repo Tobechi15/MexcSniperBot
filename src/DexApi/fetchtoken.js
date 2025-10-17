@@ -23,13 +23,11 @@ function writeJSON(file, data) {
 }
 
 /* ---------- Core Checks ---------- */
-// 1️⃣ Check if token had price history before listing → prevents relisted tokens
 async function hasPriorPrice(symbol) {
   try {
     const endTime = Date.now();
-    const startTime = endTime - 6 * 60 * 60 * 1000; // last 6 hours
+    const startTime = endTime - 6 * 60 * 60 * 1000;
     const url = `${priceEndpoint}?symbol=${symbol}&interval=1m&startTime=${startTime}&endTime=${endTime}&limit=10`;
-
     const res = await axios.get(url);
     return Array.isArray(res.data) && res.data.length > 0;
   } catch (err) {
@@ -38,7 +36,6 @@ async function hasPriorPrice(symbol) {
   }
 }
 
-// 2️⃣ Check if trading is enabled
 async function isTradingEnabled(symbol) {
   try {
     const res = await axios.get(
@@ -47,18 +44,26 @@ async function isTradingEnabled(symbol) {
     const data = res.data;
     return parseFloat(data.volume) > 0 && parseFloat(data.lastPrice) > 0;
   } catch {
-    return false; // API error → assume trading not yet open
+    return false;
   }
 }
 
-/* ---------- Fetch Token Logic ---------- */
-async function fetchTokens(checkHistory = true) {
+/* ---------- Fetch Tokens ---------- */
+async function fetchTokens(checkHistory = true, onStart = false) {
   try {
     const response = await axios.get(endpoint);
     if (!response.data || response.data.code !== 0)
       throw new Error("Invalid API response");
 
     const currentSymbols = response.data.data;
+
+    if (onStart) {
+      // On start: just snapshot current tokens
+      writeJSON(storeFile, currentSymbols);
+      console.log(`📦 Snapshot taken. Total tokens: ${currentSymbols.length}`);
+      return [];
+    }
+
     const previousSymbols = readJSON(storeFile);
     const pendingTokens = readJSON(pendingFile);
 
@@ -74,7 +79,6 @@ async function fetchTokens(checkHistory = true) {
     const stillPending = [];
 
     for (const token of tokensToCheck) {
-      // Step 1: Skip relisted tokens with prior price data
       if (checkHistory) {
         const hadPriceBefore = await hasPriorPrice(token);
         if (hadPriceBefore) {
@@ -83,7 +87,6 @@ async function fetchTokens(checkHistory = true) {
         }
       }
 
-      // Step 2: Check if trading is now open
       const tradable = await isTradingEnabled(token);
       if (tradable) {
         tradableTokens.push(token);
@@ -94,7 +97,6 @@ async function fetchTokens(checkHistory = true) {
       }
     }
 
-    // Step 3: Persist state
     writeJSON(storeFile, currentSymbols);
     writeJSON(pendingFile, stillPending);
 

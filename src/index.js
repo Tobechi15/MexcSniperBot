@@ -188,12 +188,13 @@ app.listen(PORT, async () => {
 
     // 2️⃣ Initial token snapshot (no trades executed)
     console.log("Sniper Bot Started");
-    await fetchTokens(false);
+    await fetchTokens(false, true);
+
 
     // 3️⃣ Continuous token fetch & pending management
     setInterval(async () => {
       try {
-        const tradableTokens = await fetchTokens(true); // fetch tradable & update pending automatically
+        const tradableTokens = await fetchTokens(true, false); // fetch tradable & update pending automatically
 
         if (tradableTokens.length === 0) {
           return;
