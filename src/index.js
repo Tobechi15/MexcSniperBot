@@ -4,7 +4,7 @@ const { logTrade, monitorTrade } = require("./Trade/tradeHandler");
 const { config } = require("./Utils/config");
 const { placeOrder } = require("./Trade/execute");
 const { getPendingTrades, getHistory, add } = require("./Database/transactions");
-const fetchTokens = require("./DexApi/fetchtoken");
+const { fetchTokens, isTradingEnabled } = require("./DexApi/fetchtoken");
 const Trade = require("./Database/models/Trade");
 const getPrice = require("./DexApi/getPrice");
 const sendTelegramMessage = require("./DexApi/alert");
@@ -20,6 +20,9 @@ const EMAIL = "testintel2005@gmail.com";
 app.use(express.json());
 app.use(cors());
 
+// === Trade limit per run (adjust as needed) ===
+const TRADE_LIMIT = 1;
+let tradeCount = 0;
 /**
  * Routes
  */
@@ -94,12 +97,12 @@ app.post("/auth", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const {  email, password } = req.body;
-  if (password !== PASSWORD || email !== EMAIL ) {
+  const { email, password } = req.body;
+  if (password !== PASSWORD || email !== EMAIL) {
     return res.status(401).json({ message: "Invalid password" });
   }
 
-  res.json({status: "ok", message: "Login successful" });
+  res.json({ status: "ok", message: "Login successful" });
 });
 
 // ✅ Close a pending trade by ID
@@ -178,81 +181,83 @@ app.get("/history", async (req, res) => {
 
 // Start server
 app.listen(PORT, async () => {
-  console.log(`✅ Express server running on port ${PORT}`);
-
+  console.log(`Express server running on port ${PORT}`);
   try {
-    // Connect database
+    // 1️⃣ Connect to database
     await connectDB();
 
-    console.log("🚀 Sniper Bot Started");
+    // 2️⃣ Initial token snapshot (no trades executed)
+    console.log("Sniper Bot Started");
     await fetchTokens(false);
-    const limit = 1;
-    let count = 0;
 
-    // === Continuous token fetch and trade placement ===
+    // 3️⃣ Continuous token fetch & pending management
     setInterval(async () => {
       try {
-        const tokens = await fetchTokens();
+        const tradableTokens = await fetchTokens(true); // fetch tradable & update pending automatically
 
-        for (const token of tokens) {
-          // ✅ Example condition: trade only tokens with "USDT" in symbol
+        if (tradableTokens.length === 0) {
+          return;
+        }
+
+        console.log(` Tradable tokens ready for execution: ${tradableTokens.join(", ")}`);
+
+        // 4️⃣ Execute trades for tokens that are now tradable
+        for (const token of tradableTokens) {
+          // Example: Only trade USDT pairs
           if (!token.includes("USDT")) continue;
 
-          console.log(`📌 Considering trade for ${token}`);
           sendTelegramMessage(`📌 new token discovered ${token} pls compare time`);
 
-          // if (count < limit) {
-          //   // Place order
+          if (tradeCount >= TRADE_LIMIT) {
+            console.log("⚠️ Trade limit reached for this interval.");
+            break;
+          }
 
+          // try {
           //   const order = await placeOrder(
           //     token,
           //     "BUY",
-          //     1, // trade size (adjust)
+          //     1, // Trade amount (adjust)
           //     config.MEXC_API_KEY,
           //     config.MEXC_SECRET_KEY
           //   );
 
           //   if (order) {
-          //     console.log("✅ Order executed:", order);
-          //     sendTelegramMessage(`🚀 New Trade Executed: ${token} at ${order.price} amount ${order.executedQty} USDT`);
+          //     console.log(`🚀 Trade executed for ${token} at ${order.price}`);
+          //     sendTelegramMessage(`🚀 Trade executed: ${token} at ${order.price}`);
 
-          //     // Save executed order in DB
+          //     // 5️⃣ Log trade to DB
           //     await logTrade({
           //       symbol: order.symbol,
           //       side: order.side,
           //       amount: order.executedQty,
           //       price: order.price,
-          //       stopLoss: (order.price) * 0.50, // 50% SL
-          //       takeProfit: (order.price) * 1.05, // 5% TP
+          //       stopLoss: order.price * 0.50,
+          //       takeProfit: order.price * 1.05,
           //       orderId: order.orderId,
           //     });
 
-          //     console.log("📝 Trade logged to DB");
-          //     count++;
+          //     tradeCount++;
           //   }
+          // } catch (err) {
+          //   console.error(`⚠️ Failed to execute trade for ${token}:`, err.message);
           // }
         }
       } catch (err) {
         console.error("❌ Error in token fetch loop:", err.message);
       }
-    }, 1 * 1000); // every 60 seconds
+    }, 10 * 1000); // Repeat every 10 seconds
 
-    // === Monitor trades every 30s ===
+    // 6️⃣ Monitor active trades
     setInterval(async () => {
-      const pendingTrades = await getPendingTrades();
+      const activeTrades = await getPendingTrades();
 
-      for (const t of pendingTrades) {
-        // Simulated price feed (replace with real price API)
-        const currentPrice = getPrice(t.symbol)
-
-        // console.log(
-        //   `📊 Monitoring trade ${t.symbol} | Entry: ${t.price} | Current: ${currentPrice}`
-        // );
-
-        await monitorTrade(t, currentPrice);
+      for (const trade of activeTrades) {
+        const currentPrice = await getPrice(trade.symbol);
+        await monitorTrade(trade, currentPrice);
       }
-    }, 10 * 1000);
+    }, 15 * 1000); // Check every 15 seconds
   } catch (error) {
-    console.error("❌ Fatal error in bot logic:", error.message);
+    console.error("❌ Fatal error in bot:", error.message);
   }
 });

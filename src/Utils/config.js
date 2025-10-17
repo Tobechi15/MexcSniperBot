@@ -7,6 +7,7 @@ const config = {
     PORT: process.env.PORT,
     TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID.split(","),
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    ENCRYPTION_SECRET: process.env.ENCRYPTION_SECRET,
 }
 
 module.exports = { config };

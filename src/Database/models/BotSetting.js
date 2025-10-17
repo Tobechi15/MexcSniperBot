@@ -1,13 +1,13 @@
 const fs = require('fs')
 const path = require('path')
 const crypto = require("crypto");
-require("dotenv").config();
+const { config } = require("../../Utils/config");
 
 const settingsFile = path.join(__dirname, "setting.json");
 
 // === Encryption / Decryption Helpers ===
 const ALGORITHM = "aes-256-cbc";
-const SECRET_KEY = crypto.createHash("sha256").update(process.env.ENCRYPTION_SECRET).digest();
+const SECRET_KEY = crypto.createHash("sha256").update(config.ENCRYPTION_SECRET).digest();
 const IV_LENGTH = 16;
 
 
