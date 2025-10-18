@@ -93,7 +93,6 @@ async function fetchTokens(checkHistory = true, onStart = false) {
         console.log(`✅ ${token} is now tradable.`);
       } else {
         stillPending.push(token);
-        console.log(`⏳ ${token} pending — trading not yet open.`);
       }
     }
 

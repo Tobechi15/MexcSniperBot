@@ -214,40 +214,40 @@ app.listen(PORT, async () => {
             break;
           }
 
-          // try {
-          //   const order = await placeOrder(
-          //     token,
-          //     "BUY",
-          //     1, // Trade amount (adjust)
-          //     config.MEXC_API_KEY,
-          //     config.MEXC_SECRET_KEY
-          //   );
+          try {
+            const order = await placeOrder(
+              token,
+              "BUY",
+              1, // Trade amount (adjust)
+              config.MEXC_API_KEY,
+              config.MEXC_SECRET_KEY
+            );
 
-          //   if (order) {
-          //     console.log(`🚀 Trade executed for ${token} at ${order.price}`);
-          //     sendTelegramMessage(`🚀 Trade executed: ${token} at ${order.price}`);
+            if (order) {
+              console.log(`🚀 Trade executed for ${token} at ${order.price}`);
+              sendTelegramMessage(`🚀 Trade executed: ${token} at ${order.price}`);
 
-          //     // 5️⃣ Log trade to DB
-          //     await logTrade({
-          //       symbol: order.symbol,
-          //       side: order.side,
-          //       amount: order.executedQty,
-          //       price: order.price,
-          //       stopLoss: order.price * 0.50,
-          //       takeProfit: order.price * 1.05,
-          //       orderId: order.orderId,
-          //     });
+              // 5️⃣ Log trade to DB
+              await logTrade({
+                symbol: order.symbol,
+                side: order.side,
+                amount: order.executedQty,
+                price: order.price,
+                stopLoss: order.price * 0.20,
+                takeProfit: order.price * 1.05,
+                orderId: order.orderId,
+              });
 
-          //     tradeCount++;
-          //   }
-          // } catch (err) {
-          //   console.error(`⚠️ Failed to execute trade for ${token}:`, err.message);
-          // }
+              tradeCount++;
+            }
+          } catch (err) {
+            console.error(`⚠️ Failed to execute trade for ${token}:`, err.message);
+          }
         }
       } catch (err) {
         console.error("❌ Error in token fetch loop:", err.message);
       }
-    }, 10 * 1000); // Repeat every 10 seconds
+    }, 1 * 1000); // Repeat every 1 seconds
 
     // 6️⃣ Monitor active trades
     setInterval(async () => {
@@ -257,7 +257,7 @@ app.listen(PORT, async () => {
         const currentPrice = await getPrice(trade.symbol);
         await monitorTrade(trade, currentPrice);
       }
-    }, 15 * 1000); // Check every 15 seconds
+    }, 2 * 1000); // Check every 2 seconds
   } catch (error) {
     console.error("❌ Fatal error in bot:", error.message);
   }
