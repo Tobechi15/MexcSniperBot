@@ -219,6 +219,8 @@ app.listen(PORT, async () => {
               token,
               "BUY",
               1, // Trade amount (adjust)
+              "MARKET",
+              0, // Price (not needed for MARKET)
               config.MEXC_API_KEY,
               config.MEXC_SECRET_KEY
             );
